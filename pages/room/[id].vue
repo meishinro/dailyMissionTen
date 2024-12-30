@@ -7,23 +7,36 @@ const route = useRoute();
 // 將資料渲染至下方的 div.room-page 區塊
 
 const { id } = route.params;
-const roomObject = ref({});
 const apiUrl = `https://nuxr3.zeabur.app/api/v1/rooms/${id}`;
 
-fetch(apiUrl)
-  .then(function (response) {
-    if (!response.ok) {
-      throw new Error("取得房型資料失敗");
-    }
-    return response.json();
-  })
-  .then(function (room) {
-    const { result } = room;
-    roomObject.value = result;
-  })
-  .catch((error) => {
-    console.error("發生錯誤:", error);
-  });
+const {data:roomObject}= await useFetch(apiUrl,{
+  // 如果專案需要結構化，可以使用baseURL
+  // 這樣每次呼叫API時，就不用重複寫相同的URL
+  transform:(response)=>{
+    const {result}=response;
+    return result;
+  },
+  onResponseError({response}){
+    const {message}=response._data;
+    console.error('發生錯誤:',message);
+    router.push('/');
+  }
+})
+
+// fetch(apiUrl)
+//   .then(function (response) {
+//     if (!response.ok) {
+//       throw new Error("取得房型資料失敗");
+//     }
+//     return response.json();
+//   })
+//   .then(function (room) {
+//     const { result } = room;
+//     roomObject.value = result;
+//   })
+//   .catch((error) => {
+//     console.error("發生錯誤:", error);
+//   });
 
 const isProvide = function (isProvideBoolean = false) {
   return isProvideBoolean ? "提供" : "未提供";
